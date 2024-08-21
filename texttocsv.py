@@ -1,0 +1,57 @@
+import pandas as pd
+
+# Define the content of the text file
+data = """
+ElectricFieldElectricCharge|Electric charges are distributed within a small volume. the electric flux through a spherical surface of radius 0.2m around the said volume is 50 V-m. Calculate the electric flux over the surface of a concentric sphere of radius 0.5m? A.)50V-m\tB.)312.5V-m\tC.)125V-m\tD.)25V-m|1|
+CurrentElectricity|Two electric bulbs rated 100 W,220V and 40W,220V respectively are joined in series across a supply voltage of 220V. Electric current passing through them is in the ratio A.)5:2\tB.) 2:5\tC.) 25:4\tD.) 1:1|1|
+CurrentElectricity|A battery of emf 8V with internal resistance of 0.5Ω is being charged by a 120V D.C supply using a series resistance of 15.5Ω. The terminal voltage of the battery is A.)20.5V\tB.)15.5V\tC.)11.5V\tD.)2.5V|1|
+MagneticEffectOfCurrent|Under the influence of a uniform magnetic field, a charged particle moves with constant speed v in a circle of radius. The time period of revolution of the particle is A.)depends on v and not on r\tB.)depends on r and not on v\tC.)is independent of both v and r\tD.)depends on both v and r|1|
+CurrentElectricity|Using Kirchhoff laws, calculate the current flowing through 4 Ω, 1 Ω, and 2 Ω resistors in the circuit shown below.|3|assets/img1.png
+ElectricFieldElectricCharge|An electric dipole is placed in a uniform electric field. Show that the net force acting on it is zero and derive the expression for the torque acting on it.|2|
+CurrentElectricity|Define resistivity and explain its dependence on temperature.|2|
+MagneticEffectOfCurrent|Derive the expression for the force acting on a current-carrying conductor placed in a magnetic field.|2|
+ElectricFieldElectricCharge|Calculate the electric field at a point on the axial line of an electric dipole.|3|
+CurrentElectricity|Determine the equivalent resistance of a network consisting of three resistors of 2 Ω, 3 Ω, and 6 Ω connected in parallel.|3|
+MagneticEffectOfCurrent|Explain the principle of a moving coil galvanometer and derive the expression for the current sensitivity.|3|
+ElectricFieldElectricCharge|Explain Gauss's law and its application in calculating the electric field due to a charged spherical shell.|5|
+CurrentElectricity|Describe the construction and working of a potentiometer. How can it be used to measure the internal resistance of a cell?|5|
+MagneticEffectOfCurrent|Discuss the working principle of a cyclotron and derive the expression for the kinetic energy of the accelerated charged particles.|5|
+CurrentElectricity|An electric heater rated 1000 W operates on a 220 V supply. Calculate the current flowing through the heater and the resistance of the heater element.|1|
+ElectricFieldElectricCharge|A point charge of +10 μC is placed at the origin. Calculate the electric field intensity at a point 0.2 m away from the charge.|1|
+MagneticEffectOfCurrent|A current-carrying circular loop is placed in a uniform magnetic field. Explain the orientation of the loop to experience maximum torque.|2|
+CurrentElectricity|Using Ohm's law, calculate the voltage across a resistor of 5 Ω carrying a current of 2 A.|1|
+ElectricFieldElectricCharge|Two point charges of +5 μC and -5 μC are placed 0.1 m apart. Calculate the force between them.|2|
+MagneticEffectOfCurrent|Explain the working of a current loop as a magnetic dipole and derive the expression for its magnetic moment.|2|
+CurrentElectricity|Derive the formula for the combined resistance of three resistors connected in series.|2|
+ElectricFieldElectricCharge|Derive the expression for the electric potential at a point due to a point charge.|2|
+CurrentElectricity|A parallel plate capacitor has plates of area 2 m² separated by a distance of 0.01 m. If a dielectric of dielectric constant 5 is placed between the plates, calculate the capacitance.|3|
+MagneticEffectOfCurrent|Explain the concept of magnetic flux and derive the expression for the flux through a rectangular loop placed in a uniform magnetic field.|3|
+ElectricFieldElectricCharge|Calculate the work done in moving a charge of 2 μC from a point at a potential of 5 V to a point at a potential of 10 V.|3|
+CurrentElectricity|A wire of resistance 10 Ω is stretched to double its length. Calculate the new resistance of the wire.|3|
+ElectricFieldElectricCharge|Discuss the concept of electric dipole moment and derive the expression for the potential due to an electric dipole at an axial point.|5|
+CurrentElectricity|Explain the construction and working of a Wheatstone bridge and derive the condition for its balance.|5|
+MagneticEffectOfCurrent|Describe the construction and working of a transformer. Derive the expressions for the efficiency and voltage transformation ratio.|5|
+ElectricFieldElectricCharge|Using Coulomb’s law, explain the concept of electric field lines and their properties.|5|
+"""
+
+# Split the text into lines
+lines = data.strip().split('\n')
+
+# Process the lines into a list of dictionaries
+data_list = []
+for line in lines:
+    parts = line.split('|')
+    topic = parts[0]
+    question_text = parts[1]
+    marks = int(parts[2])
+    image_path = parts[3] if len(parts) > 3 else None
+    data_list.append({"Topic": topic, "QuestionText": question_text, "Marks": marks, "ImagePath": image_path})
+
+# Create a DataFrame from the list
+df = pd.DataFrame(data_list)
+
+# Save the DataFrame to a CSV file
+csv_filename = './question_bank.csv'
+df.to_csv(csv_filename, index=False)
+
+df.head()
