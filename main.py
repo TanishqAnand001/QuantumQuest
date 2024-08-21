@@ -1,3 +1,6 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from tkinter import ttk
 import random
 import pandas as pd
 from docx import Document
@@ -7,12 +10,6 @@ from docx.shared import Inches
 
 
 def read_question_bank_csv(filename):
-    """
-    Read the question bank from a CSV file and return a dictionary of topics and their associated questions.
-
-    :param filename: Name of the question bank CSV file.
-    :return: Dictionary of topics and their associated questions.
-    """
     df = pd.read_csv(filename)
     topics = {}
 
@@ -109,70 +106,130 @@ def create_question_paper(
     doc.save(output_filename)
 
 
-def prompt_user_for_input(topics):
-    num_questions_per_type = {}
-    remaining_questions_per_type = {}
+class QuestionPaperApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Question Paper Generator")
+        self.root.geometry("600x400")
 
-    for mark_type in [1, 2, 3, 5]:
-        while True:
-            try:
-                num_questions = int(
-                    input(f"Enter the total number of {mark_type}-mark questions: ")
-                )
-                if num_questions < 0:
-                    print("Error: Please enter a non-negative number of questions.")
-                else:
-                    num_questions_per_type[mark_type] = num_questions
-                    remaining_questions_per_type[mark_type] = num_questions
-                    break
-            except ValueError:
-                print("Error: Please enter a valid integer number of questions.")
+        self.filename = ""
+        self.topics = {}
+        self.num_questions_per_type = {}
+        self.specific_topic_questions = {}
 
-    num_questions_per_topic = {}
+        self.set_theme()
+        self.create_widgets()
 
-    for topic in topics:
-        print(f"\nFor topic '{topic}':")
-        topic_questions = {}
+    def set_theme(self):
+        # Define the dark color scheme
+        self.primary_color = "#2E2E2E"
+        self.secondary_color = "#FF8C00"
+        self.text_color = "white"
 
-        for mark_type in num_questions_per_type:
-            max_questions = remaining_questions_per_type[mark_type]
-            while True:
-                try:
-                    num_questions = int(
-                        input(
-                            f"Enter the number of {mark_type}-mark questions you want from topic '{topic}' (maximum {max_questions}): "
-                        )
+        style = ttk.Style()
+        style.theme_use("clam")
+
+        # Configure the theme
+        style.configure("TFrame", background=self.primary_color)
+        style.configure(
+            "TLabel",
+            background=self.primary_color,
+            foreground=self.text_color,
+            font=("Helvetica", 10),
+        )
+        style.configure(
+            "TButton",
+            background=self.primary_color,
+            foreground=self.text_color,
+            font=("Helvetica", 10, "bold"),
+            highlightbackground=self.secondary_color,
+        )
+        style.map(
+            "TButton",
+            background=[("active", self.secondary_color)],
+            foreground=[("active", self.text_color)],
+        )
+        style.configure(
+            "TEntry",
+            fieldbackground=self.primary_color,
+            foreground=self.text_color,
+            insertcolor=self.text_color,
+        )
+
+    def create_widgets(self):
+        self.select_file_button = ttk.Button(
+            self.root, text="Select Question Bank CSV", command=self.load_csv
+        )
+        self.select_file_button.pack(pady=10)
+
+        self.questions_frame = ttk.Frame(self.root)
+        self.questions_frame.pack(fill="x", pady=10)
+
+        self.question_labels = {}
+        self.question_entries = {}
+        for mark_type in [1, 2, 3, 5]:
+            lbl = ttk.Label(
+                self.questions_frame, text=f"Number of {mark_type}-mark questions:"
+            )
+            lbl.grid(row=mark_type - 1, column=0, padx=5, pady=5, sticky="e")
+
+            entry = ttk.Entry(self.questions_frame, width=10)
+            entry.grid(row=mark_type - 1, column=1, padx=5, pady=5, sticky="w")
+
+            self.question_labels[mark_type] = lbl
+            self.question_entries[mark_type] = entry
+
+        self.generate_button = ttk.Button(
+            self.root,
+            text="Generate Question Paper",
+            command=self.generate_question_paper,
+        )
+        self.generate_button.pack(pady=20)
+
+    def load_csv(self):
+        self.filename = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+        if self.filename:
+            self.topics = read_question_bank_csv(self.filename)
+            messagebox.showinfo("Success", "Question bank loaded successfully!")
+
+    def generate_question_paper(self):
+        output_filename = filedialog.asksaveasfilename(
+            defaultextension=".docx", filetypes=[("Word Document", "*.docx")]
+        )
+
+        if not output_filename:
+            return
+
+        try:
+            for mark_type in [1, 2, 3, 5]:
+                num_questions = int(self.question_entries[mark_type].get())
+                self.num_questions_per_type[mark_type] = num_questions
+
+            self.specific_topic_questions = {topic: {} for topic in self.topics}
+
+            for topic in self.topics:
+                for mark_type in self.num_questions_per_type:
+                    max_questions = self.num_questions_per_type[mark_type]
+                    num_questions = min(
+                        max_questions, len(self.topics[topic].get(mark_type, []))
                     )
-                    if num_questions < 0:
-                        print("Error: Please enter a non-negative number of questions.")
-                    elif num_questions > max_questions:
-                        print(
-                            f"Error: The number of {mark_type}-mark questions from '{topic}' exceeds the maximum allowed ({max_questions})."
-                        )
-                    else:
-                        topic_questions[mark_type] = num_questions
-                        remaining_questions_per_type[mark_type] -= num_questions
-                        break
-                except ValueError:
-                    print("Error: Please enter a valid integer number of questions.")
+                    self.specific_topic_questions[topic][mark_type] = num_questions
 
-        num_questions_per_topic[topic] = topic_questions
+            create_question_paper(
+                self.topics,
+                self.num_questions_per_type,
+                self.specific_topic_questions,
+                output_filename,
+            )
+            messagebox.showinfo("Success", "Question paper generated successfully!")
 
-    output_filename = input(
-        "Enter the output filename (e.g., Question_Paper.docx): "
-    ).strip()
-    return num_questions_per_type, num_questions_per_topic, output_filename
+        except ValueError:
+            messagebox.showerror(
+                "Error", "Please enter valid numbers for all question types."
+            )
 
 
-# Main execution
 if __name__ == "__main__":
-    question_bank_filename = "question_bank.csv"
-    topics = read_question_bank_csv(question_bank_filename)
-
-    num_questions_per_type, specific_topic_questions, output_filename = (
-        prompt_user_for_input(topics)
-    )
-
-    create_question_paper(
-        topics, num_questions_per_type, specific_topic_questions, output_filename
-    )
+    root = tk.Tk()
+    app = QuestionPaperApp(root)
+    root.mainloop()
