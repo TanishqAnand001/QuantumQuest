@@ -122,9 +122,11 @@ class QuestionPaperApp:
 
     def set_theme(self):
         # Define the dark color scheme
-        self.primary_color = "#2E2E2E"
-        self.secondary_color = "#FF8C00"
-        self.text_color = "white"
+        self.primary_color = "#121212"
+        self.secondary_color = "#FF9800"
+        self.text_color = "#FFFFFF"
+        self.entry_bg_color = "#1E1E1E"
+        self.entry_fg_color = "#FFFFFF"
 
         style = ttk.Style()
         style.theme_use("clam")
@@ -139,21 +141,20 @@ class QuestionPaperApp:
         )
         style.configure(
             "TButton",
-            background=self.primary_color,
-            foreground=self.text_color,
+            background=self.secondary_color,
+            foreground=self.primary_color,
             font=("Helvetica", 10, "bold"),
-            highlightbackground=self.secondary_color,
         )
         style.map(
             "TButton",
-            background=[("active", self.secondary_color)],
-            foreground=[("active", self.text_color)],
+            background=[("active", self.primary_color), ("disabled", "#A0A0A0")],
+            foreground=[("active", self.text_color), ("disabled", "#A0A0A0")],
         )
         style.configure(
             "TEntry",
-            fieldbackground=self.primary_color,
-            foreground=self.text_color,
-            insertcolor=self.text_color,
+            fieldbackground=self.entry_bg_color,
+            foreground=self.entry_fg_color,
+            insertcolor=self.entry_fg_color,
         )
 
     def create_widgets(self):
